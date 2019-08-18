@@ -29,7 +29,12 @@ async function robot() {
     console.log('> [text-robot] Fetching content from Wikipedia')
     const algorithmiaAuthenticated = algorithmia(algorithmiaApiKey)
     const wikipediaAlgorithm = algorithmiaAuthenticated.algo('web/WikipediaParser/0.1.2')
-    const wikipediaResponse = await wikipediaAlgorithm.pipe(content.searchTerm)
+	
+	var input = {
+	  "articleName": content.searchTerm,
+	  "lang": "pt"
+	};
+    const wikipediaResponse = await wikipediaAlgorithm.pipe(input)
     const wikipediaContent = wikipediaResponse.get()
 
     content.sourceContentOriginal = wikipediaContent.content

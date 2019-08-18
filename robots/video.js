@@ -201,7 +201,7 @@ async function robot() {
 
     const videoOptions = {
       fps: 25,
-      loop: 5, // seconds
+      loop: 10, // seconds
       transition: true,
       transitionDuration: 1, // seconds
       videoBitrate: 1024,
