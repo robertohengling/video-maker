@@ -29,7 +29,12 @@ async function robot() {
     console.log('> [text-robot] Fetching content from Wikipedia')
     const algorithmiaAuthenticated = algorithmia(algorithmiaApiKey)
     const wikipediaAlgorithm = algorithmiaAuthenticated.algo('web/WikipediaParser/0.1.2')
-    const wikipediaResponse = await wikipediaAlgorithm.pipe(content.searchTerm)
+	
+	var input = {
+	  "articleName": content.searchTerm,
+	  "lang": "pt"
+	};
+    const wikipediaResponse = await wikipediaAlgorithm.pipe(input)
     const wikipediaContent = wikipediaResponse.get()
 
     content.sourceContentOriginal = wikipediaContent.content
@@ -80,20 +85,25 @@ async function robot() {
 
   async function fetchKeywordsOfAllSentences(content) {
     console.log('> [text-robot] Starting to fetch keywords from Watson')
+      
+    const listOfKeywordsToFetch = []
 
     for (const sentence of content.sentences) {
+      
       console.log(`> [text-robot] Sentence: "${sentence.text}"`)
-
-      sentence.keywords = await fetchWatsonAndReturnKeywords(sentence.text)
-
-      console.log(`> [text-robot] Keywords: ${sentence.keywords.join(', ')}\n`)
+      
+      listOfKeywordsToFetch.push(
+        fetchWatsonAndReturnKeywords(sentence)
+      )
     }
+
+    await Promise.all(listOfKeywordsToFetch)
   }
 
   async function fetchWatsonAndReturnKeywords(sentence) {
     return new Promise((resolve, reject) => {
       nlu.analyze({
-        text: sentence,
+        text: sentence.text,
         features: {
           keywords: {}
         }
@@ -106,6 +116,8 @@ async function robot() {
         const keywords = response.keywords.map((keyword) => {
           return keyword.text
         })
+
+        sentence.keywords = keywords
 
         resolve(keywords)
       })
